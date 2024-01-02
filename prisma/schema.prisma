@@ -66,6 +66,7 @@ model Vivienda {
   cedula_propietario String
   alicuota           Float      @db.DoublePrecision
   dimension          Float      @db.DoublePrecision
+  ocupada            Boolean    @default(false)
 }
 
 model Junta {
@@ -115,6 +116,7 @@ model Pago {
   metodo_pago     String
   notas           String?
   nro_referencia  String?
+  confirmado      Boolean  @default(false)
   url_comprobante String
 }
 

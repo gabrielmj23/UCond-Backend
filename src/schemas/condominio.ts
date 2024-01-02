@@ -32,6 +32,7 @@ export const viviendaSchema = z.array(
         dimension: z
             .number()
             .min(1, "La dimensión de vivienda debe ser positiva"),
+        ocupada: z.boolean().optional(),
     }),
 );
 

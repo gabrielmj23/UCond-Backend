@@ -83,7 +83,19 @@
 -   `GET /api/reportes/:id/archivo`
 -   devuelve: archivo cargado en el reporte
 
-###
+## Viviendas
+
+### Cambiar propietario de una vivienda
+
+- `PUT /api/viviendas/:id`
+- recibe:
+```json
+{
+    "cedula_propietario": string,
+    "ocupada": boolean
+}
+```
+- devuelve: status 200
 
 ## Usuarios
 
