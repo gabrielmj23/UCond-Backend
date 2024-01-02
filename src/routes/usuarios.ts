@@ -179,18 +179,17 @@ usuariosRouter.get("/:userId/viviendas", async (req, res) => {
                     { cedula_propietario: cedula.cedula },
                 ],
             },
-            include: {
+            select: {
+                id: true,
+                nombre: true,
+                id_condominio: true,
                 condominio: {
-                    select: { id_administrador: true, nombre: true },
+                    select: { nombre: true },
                 },
             },
         });
         res.json({
             viviendas: viviendas
-                .filter(
-                    (vivienda) =>
-                        vivienda.condominio.id_administrador !== userId,
-                )
                 .map((vivienda) => ({
                     id: vivienda.id,
                     nombre: vivienda.nombre,
