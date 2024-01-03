@@ -183,6 +183,7 @@ usuariosRouter.get("/:userId/viviendas", async (req, res) => {
                 id: true,
                 nombre: true,
                 id_condominio: true,
+                ocupada: true,
                 condominio: {
                     select: { nombre: true },
                 },
@@ -194,6 +195,7 @@ usuariosRouter.get("/:userId/viviendas", async (req, res) => {
                     id: vivienda.id,
                     nombre: vivienda.nombre,
                     id_condominio: vivienda.id_condominio,
+                    ocupada: vivienda.ocupada,
                     nombre_condominio: vivienda.condominio.nombre,
                 }))
                 .reduce(
@@ -204,6 +206,7 @@ usuariosRouter.get("/:userId/viviendas", async (req, res) => {
                                 id: number;
                                 nombre: string;
                                 id_condominio: number;
+                                ocupada: boolean;
                             }[]
                         >,
                         v,
@@ -213,6 +216,7 @@ usuariosRouter.get("/:userId/viviendas", async (req, res) => {
                             id: v.id,
                             nombre: v.nombre,
                             id_condominio: v.id_condominio,
+                            ocupada: v.ocupada,
                         });
                         return r;
                     },
