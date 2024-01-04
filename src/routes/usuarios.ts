@@ -447,3 +447,24 @@ usuariosRouter.post(
         }
     },
 );
+
+/**
+ * GET /api/usuarios/:userId/reportes/:condoId
+ * Busca los reportes de un usuario en un condominio
+ */
+usuariosRouter.get("/:userId/reportes/:condoId", async (req, res) => {
+    try {
+        const [userId, condoId] = [
+            Number(req.params.userId),
+            Number(req.params.condoId),
+        ];
+        // Buscar reportes
+        const reportes = await prisma.reporte.findMany({
+            where: { id_usuario: userId, id_condominio: condoId },
+        });
+        res.json({ reportes });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error });
+    }
+});

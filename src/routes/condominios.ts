@@ -371,15 +371,28 @@ condominioRouter.get("/:id/pagos", async (req, res) => {
 });
 
 /**
- * GET /api/condominio/:id/reportes
+ * GET /api/condominio/:id/reportes?activo=<activo>
  * Busca los reportes asociados a un condominio por id
  */
 condominioRouter.get("/:id/reportes", async (req, res) => {
     try {
+        const estadoReporte = req.query.activo
+            ? Boolean(req.query.activo)
+            : true;
         const idCondominio = parseInt(req.params.id); // Obtener el ID de los parámetros de la URL
         // Buscar reportes asociados al condominio
         const reportes = await prisma.reporte.findMany({
-            where: { id_condominio: idCondominio },
+            where: { id_condominio: idCondominio, activo: estadoReporte },
+            include: {
+                usuario: {
+                    select: {
+                        cedula: true,
+                        nombre: true,
+                        apellido: true,
+                        correo: true,
+                    },
+                },
+            },
         });
         res.json({
             reportes,
