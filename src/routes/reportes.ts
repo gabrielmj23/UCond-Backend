@@ -80,3 +80,20 @@ reportesRouter.post(
         }
     },
 );
+
+/**
+ * PUT /api/reportes/:id
+ * Cierra el reporte de id :id
+ */
+reportesRouter.put("/:id", async (req, res) => {
+    try {
+        await prisma.reporte.update({
+            where: { id: Number(req.params.id) },
+            data: { activo: false },
+        });
+        res.sendStatus(200);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error });
+    }
+});
