@@ -48,7 +48,7 @@ reportesRouter.post(
         try {
             // Verifica que el condominio existe
             const condo = await prisma.condominio.findUnique({
-                where: { id: req.body.id_condominio },
+                where: { id: Number(req.body.id_condominio) },
                 include: { viviendas: true },
             });
             if (!condo)
@@ -58,7 +58,7 @@ reportesRouter.post(
 
             // Verifica que el usuario existe
             const user = await prisma.user.findUnique({
-                where: { id: req.body.id_usuario },
+                where: { id: Number(req.body.id_usuario) },
             });
             if (!user)
                 return res.status(404).json({ error: "El usuario no existe" });
@@ -75,7 +75,7 @@ reportesRouter.post(
             if (error instanceof z.ZodError) {
                 return res.status(400).json({ error: error.issues });
             }
-            res.status(500).json({ error: "Error al crear el reporte" });
+            res.status(500).json({ error });
             console.log(error);
         }
     },
