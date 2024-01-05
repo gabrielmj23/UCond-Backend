@@ -89,6 +89,7 @@ model Gasto {
   id_condominio Int
   monto         Float      @db.DoublePrecision
   concepto      String
+  fecha_creado  DateTime   @default(now())
   fecha_limite  DateTime
   tipo          String
   activo        Boolean    @default(true)

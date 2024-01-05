@@ -79,6 +79,9 @@ viviendasRouter.get("/:id/pagos", async (req, res) => {
                     },
                 },
             },
+            orderBy: {
+                fecha_pago: "desc",
+            },
             take: 50,
         });
         res.json({
