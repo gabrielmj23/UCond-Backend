@@ -57,6 +57,8 @@ viviendasRouter.get("/:id/pagos", async (req, res) => {
                 monto_pagado: true,
                 metodo_pago: true,
                 confirmado: true,
+                nro_referencia: true,
+                url_comprobante: true,
                 deuda: {
                     select: {
                         gasto: {
@@ -75,6 +77,8 @@ viviendasRouter.get("/:id/pagos", async (req, res) => {
                 metodo_pago: pago.metodo_pago,
                 confirmado: pago.confirmado,
                 concepto: pago.deuda.gasto.concepto,
+                nro_referencia: pago.nro_referencia,
+                url_comprobante: pago.url_comprobante,
             })),
         });
     } catch (error) {
