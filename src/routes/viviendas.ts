@@ -13,7 +13,13 @@ viviendasRouter.get("/:id/deudas", async (req, res) => {
     try {
         const vivienda = await prisma.vivienda.findUnique({
             where: { id: Number(req.params.id) },
-            select: { nombre: true },
+            select: {
+                nombre: true,
+                alicuota: true,
+                condominio: {
+                    select: { metodos_pago: { select: { tipo: true } } },
+                },
+            },
         });
         const deudas = await prisma.deuda.findMany({
             where: { id_vivienda: Number(req.params.id), activa: true },
@@ -24,6 +30,10 @@ viviendasRouter.get("/:id/deudas", async (req, res) => {
         });
         res.json({
             nombre_vivienda: vivienda?.nombre,
+            alicuota: vivienda?.alicuota,
+            metodos_pago: vivienda?.condominio.metodos_pago.map(
+                (metodo) => metodo.tipo,
+            ),
             deudas: deudas.map((deuda) => ({
                 id: deuda.id,
                 gasto: deuda.gasto,
