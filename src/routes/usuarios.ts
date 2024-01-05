@@ -306,7 +306,14 @@ usuariosRouter.post(
             await prisma.$transaction(async (tx) => {
                 // Crear pago
                 await tx.pago.create({
-                    data: pago,
+                    data: {
+                        id_deuda: pago.id_deuda,
+                        monto_pagado: pago.monto_pagado,
+                        metodo_pago: pago.metodo_pago,
+                        url_comprobante: pago.url_comprobante,
+                        notas: pago.notas,
+                        nro_referencia: pago.nro_referencia,
+                    },
                 });
                 // Actualizar deuda
                 if (montoPagadoDeuda === deuda.monto_usuario) {
