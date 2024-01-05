@@ -328,41 +328,34 @@ condominioRouter.get("/:id/pagos", async (req, res) => {
         const idCondominio = parseInt(req.params.id); // Obtener el ID de los parámetros de la URL
         // Buscar pagos asociados al condominio
         const pagos = await prisma.pago.findMany({
-            include: { deuda: { include: { gasto: true, usuario: true } } },
+            where: {
+                deuda: {
+                    gasto: {
+                        id_condominio: idCondominio,
+                    },
+                },
+            },
+            include: {
+                deuda: {
+                    include: {
+                        gasto: true,
+                        vivienda: {
+                            select: {
+                                cedula_propietario: true,
+                                propietario: {
+                                    select: {
+                                        nombre: true,
+                                        apellido: true,
+                                        correo: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
         });
-
-        res.json({
-            pagados: pagos
-                .filter(
-                    (p) =>
-                        p.deuda.gasto.id_condominio === idCondominio &&
-                        p.deuda.gasto.activo,
-                )
-                .map((p) => ({
-                    id: p.id,
-                    nombre_usuario: p.deuda.usuario?.nombre,
-                    cedula_usuario: p.deuda.cedula_usuario,
-                    monto: p.monto_pagado,
-                    metodo_pago: p.metodo_pago,
-                    fecha_pago: p.fecha_pago,
-                    concepto: p.deuda.gasto.concepto,
-                })),
-            por_pagar: pagos
-                .filter(
-                    (p) =>
-                        p.deuda.gasto.id_condominio === idCondominio &&
-                        !p.deuda.gasto.activo,
-                )
-                .map((p) => ({
-                    id: p.id,
-                    nombre_usuario: p.deuda.usuario?.nombre,
-                    cedula_usuario: p.deuda.cedula_usuario,
-                    monto: p.monto_pagado,
-                    metodo_pago: p.metodo_pago,
-                    fecha_pago: p.fecha_pago,
-                    concepto: p.deuda.gasto.concepto,
-                })),
-        });
+        res.json({ pagos });
     } catch (error) {
         res.status(500).json({
             error: "Error al obtener los pagos del condominio",

@@ -36,7 +36,7 @@ gastosRouter.post("/", async (req, res) => {
             gasto.tipo === "Comun"
                 ? {
                       create: condo.viviendas.map((vivienda) => ({
-                          cedula_usuario: vivienda.cedula_propietario,
+                          id_vivienda: vivienda.id,
                           monto_usuario: gasto.monto * vivienda.alicuota,
                       })),
                   }
@@ -48,7 +48,7 @@ gastosRouter.post("/", async (req, res) => {
                           if (!vivienda)
                               throw new Error("La vivienda no existe");
                           return {
-                              cedula_usuario: vivienda.cedula_propietario,
+                              id_vivienda: vivienda.id,
                               monto_usuario:
                                   gasto.monto *
                                   (vivienda.dimension / dimensionParticular),
