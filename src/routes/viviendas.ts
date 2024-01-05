@@ -59,7 +59,9 @@ viviendasRouter.get("/:id/pagos", async (req, res) => {
     try {
         const pagos = await prisma.pago.findMany({
             where: {
-                id: Number(req.params.id),
+                deuda: {
+                    id_vivienda: Number(req.params.id),
+                },
             },
             select: {
                 id: true,
