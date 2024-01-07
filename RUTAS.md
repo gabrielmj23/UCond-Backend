@@ -70,6 +70,14 @@
 -   `GET /api/gastos/dolarprecio`
 -   Implementado en gastos
 
+## Pagos
+
+### Confirmar un pago
+
+-   `PUT /api/pagos/:id`
+-   Devuelve status 200
+-   Desactiva deudas y gastos de demostrarse necesario
+
 ## Reportes
 
 ### Crear un reporte
@@ -87,15 +95,17 @@
 
 ### Cambiar propietario de una vivienda
 
-- `PUT /api/viviendas/:id`
-- recibe:
+-   `PUT /api/viviendas/:id`
+-   recibe:
+
 ```json
 {
     "cedula_propietario": string,
     "ocupada": boolean
 }
 ```
-- devuelve: status 200
+
+-   devuelve: status 200
 
 ## Usuarios
 

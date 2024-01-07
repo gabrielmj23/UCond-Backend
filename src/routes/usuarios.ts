@@ -5,10 +5,6 @@ import { z } from "zod";
 import { updateUserSchema } from "../schemas/user";
 import { pagoSchema } from "../schemas/pago";
 import multer from "multer";
-import {
-    obtenerMontoPagadoDeuda,
-    obtenerMontoPagadoGasto,
-} from "../../utils/montosRestantes";
 
 export const usuariosRouter = Router();
 const prisma = new PrismaClient();
@@ -258,7 +254,7 @@ usuariosRouter.post(
                 url_comprobante: req.file.path,
             });
 
-            //Verificar que el id_usuario exista
+            //Verificar que la vivienda existe
             const vivienda = await prisma.vivienda.findUnique({
                 where: { id: pago.id_vivienda },
             });
@@ -280,56 +276,18 @@ usuariosRouter.post(
                     .json({ error: "La deuda no está activa" });
             }
 
-            // Obtener información del gasto
-            const gasto = await prisma.gasto.findUnique({
-                where: { id: deuda.id_gasto },
-                include: { deudas: { include: { pagos: true } } },
+            // Crear pago
+            await prisma.pago.create({
+                data: {
+                    id_deuda: pago.id_deuda,
+                    monto_pagado: pago.monto_pagado,
+                    metodo_pago: pago.metodo_pago,
+                    url_comprobante: pago.url_comprobante,
+                    notas: pago.notas,
+                    nro_referencia: pago.nro_referencia,
+                },
             });
-            if (!gasto) {
-                return res.status(404).json({ error: "Gasto no encontrado" });
-            }
-            if (!gasto.activo) {
-                return res
-                    .status(400)
-                    .json({ error: "El gasto no está activo" });
-            }
 
-            // Calcular cuánto se ha pagado del gasto
-            const montoPagadoGasto =
-                obtenerMontoPagadoGasto(gasto) + pago.monto_pagado;
-
-            // Calcular cuánto se ha pagado del gasto
-            const montoPagadoDeuda =
-                obtenerMontoPagadoDeuda(deuda) + pago.monto_pagado;
-
-            // Ejecutar operaciones de la BD
-            await prisma.$transaction(async (tx) => {
-                // Crear pago
-                await tx.pago.create({
-                    data: {
-                        id_deuda: pago.id_deuda,
-                        monto_pagado: pago.monto_pagado,
-                        metodo_pago: pago.metodo_pago,
-                        url_comprobante: pago.url_comprobante,
-                        notas: pago.notas,
-                        nro_referencia: pago.nro_referencia,
-                    },
-                });
-                // Actualizar deuda
-                if (montoPagadoDeuda === deuda.monto_usuario) {
-                    await tx.deuda.update({
-                        where: { id: deuda.id },
-                        data: { activa: false },
-                    });
-                }
-                // Actualizar gasto
-                if (montoPagadoGasto === gasto.monto) {
-                    await tx.gasto.update({
-                        where: { id: gasto.id },
-                        data: { activo: false },
-                    });
-                }
-            });
             res.sendStatus(200);
         } catch (error) {
             //Error de validacion
