@@ -370,6 +370,7 @@ condominioRouter.get("/:id/pagos", async (req, res) => {
                         vivienda: {
                             select: {
                                 cedula_propietario: true,
+                                nombre: true,
                                 propietario: {
                                     select: {
                                         nombre: true,
