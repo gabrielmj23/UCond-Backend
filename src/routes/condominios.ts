@@ -307,10 +307,38 @@ condominioRouter.get("/:id/gastos", async (req, res) => {
         // Buscar gastos asociados al condominio
         const gastos = await prisma.gasto.findMany({
             where: { id_condominio: idCondominio },
+            include: {
+                deudas: {
+                    select: {
+                        monto_usuario: true,
+                        vivienda: {
+                            select: {
+                                nombre: true,
+                                cedula_propietario: true,
+                            },
+                        },
+                    },
+                },
+            },
         });
         res.json({
-            pagados: gastos.filter((g) => !g.activo),
-            por_pagar: gastos.filter((g) => g.activo),
+            pagados: gastos
+                .filter((g) => !g.activo)
+                .map((gasto) => {
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    const { deudas, ...restoGasto } = gasto;
+                    return restoGasto;
+                }),
+            por_pagar: gastos
+                .filter((g) => g.activo)
+                .map((gasto) => ({
+                    ...gasto,
+                    deudas: gasto.deudas.map((deuda) => ({
+                        monto: deuda.monto_usuario,
+                        nombre_vivienda: deuda.vivienda.nombre,
+                        cedula_usuario: deuda.vivienda.cedula_propietario,
+                    })),
+                })),
         });
     } catch (error) {
         res.status(500).json({
