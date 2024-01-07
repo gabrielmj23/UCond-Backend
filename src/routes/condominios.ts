@@ -309,8 +309,8 @@ condominioRouter.get("/:id/gastos", async (req, res) => {
             where: { id_condominio: idCondominio },
         });
         res.json({
-            pagados: gastos.filter((g) => g.activo),
-            por_pagar: gastos.filter((g) => !g.activo),
+            pagados: gastos.filter((g) => !g.activo),
+            por_pagar: gastos.filter((g) => g.activo),
         });
     } catch (error) {
         res.status(500).json({
