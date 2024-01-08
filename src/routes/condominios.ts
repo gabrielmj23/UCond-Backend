@@ -19,6 +19,7 @@ const paginas_upload = multer({
         },
     }),
 });
+
 const comprobantes_plan_upload = multer({
     storage: multer.diskStorage({
         destination: "public/comprobantes_plan/",
@@ -384,7 +385,12 @@ condominioRouter.get("/:id/pagos", async (req, res) => {
                 },
             },
         });
-        res.json({ pagos });
+
+
+        res.json({
+            confirmados: pagos.filter((p) => p.confirmado),
+            por_confirmar: pagos.filter((p) => !p.confirmado),
+        });
     } catch (error) {
         res.status(500).json({
             error: "Error al obtener los pagos del condominio",
