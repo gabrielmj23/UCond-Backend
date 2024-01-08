@@ -127,6 +127,7 @@ condominioRouter.post("/:id/viviendas", async (req, res) => {
     }
 });
 
+
 /**
  * POST /api/condominios/:id/metodos_pago
  * Agrega métodos de pago a un condominio
@@ -236,20 +237,29 @@ condominioRouter.get("/:id", async (req, res) => {
 
         const condominio = await prisma.condominio.findUnique({
             where: { id: id },
+            include: {
+                metodos_pago: true,
+            },
         });
+
+
         //Verificar que el condominio exista
         if (!condominio) {
             return res.status(404).json({ error: "El condominio no existe" });
         }
+
         res.json(condominio);
+
     } catch (error) {
         res.status(500).json({ error: "Error al obtener el condominio" });
         console.error(error);
     }
 });
 
+
+
 /**
- * GET /api/condominio/:id/inquilinos
+ * GET /api/condominios/:id/inquilinos
  * Busca los inquilinos de un condominio por su id
  */
 condominioRouter.get("/:id/inquilinos", async (req, res) => {
@@ -269,7 +279,7 @@ condominioRouter.get("/:id/inquilinos", async (req, res) => {
 });
 
 /**
- * GET /api/condominio/:condominioId/:userId/alicuotas
+ * GET /api/condominios/:condominioId/:userId/alicuotas
  * Busca las alicuotas de un usuario en un condominio
  */
 condominioRouter.get("/:condominioId/:userId/alicuotas", async (req, res) => {
@@ -313,6 +323,7 @@ condominioRouter.get("/:id/gastos", async (req, res) => {
                     select: {
                         monto_usuario: true,
                         vivienda: {
+
                             select: {
                                 nombre: true,
                                 cedula_propietario: true,
