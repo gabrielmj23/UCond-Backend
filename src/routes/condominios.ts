@@ -328,6 +328,7 @@ condominioRouter.get("/:id/gastos", async (req, res) => {
             pagados: gastos.filter((g) => !g.activo).map((gasto) => ({
                 ...gasto,
                 deudas: gasto.deudas.map((deuda) => ({
+                    monto_usuario: deuda.monto_usuario,
                     nombre_vivienda: deuda.vivienda.nombre,
                     cedula_usuario: deuda.vivienda.cedula_propietario,
                 })),
@@ -337,6 +338,7 @@ condominioRouter.get("/:id/gastos", async (req, res) => {
                 .filter((g) => g.activo).map((gasto) => ({
                     ...gasto,
                     deudas: gasto.deudas.map((deuda) => ({
+                        monto_usuario: deuda.monto_usuario,
                         nombre_vivienda: deuda.vivienda.nombre,
                         cedula_usuario: deuda.vivienda.cedula_propietario,
                     })),
