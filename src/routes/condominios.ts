@@ -216,10 +216,72 @@ condominioRouter.delete("/:id", async (req, res) => {
             return res.status(404).json({ error: "El condominio no existe" });
         }
 
-        await prisma.condominio.delete({
-            where: { id: id },
-        });
-        res.json(condominio);
+        const borrarPagos = prisma.pago.deleteMany({
+            where: {
+                deuda: {
+                    gasto: {
+                        id_condominio: id
+                    }
+                }
+            }
+        })
+
+        const borrarDeudas = prisma.deuda.deleteMany({
+            where: {
+                gasto: {
+                    id_condominio: id
+                }
+            }
+        })
+
+        const borrarGastos = prisma.gasto.deleteMany({
+            where: {
+                id_condominio: id
+            }
+        })
+
+        const borrarViviendas = prisma.vivienda.deleteMany({
+            where: {
+                id_condominio: id
+            }
+        })
+
+        const borrarReportes = prisma.reporte.deleteMany({
+            where: {
+                id_condominio: id
+            }
+        })
+
+        const borrarAnuncios = prisma.anuncio.deleteMany({
+            where: {
+                id_condominio: id
+            }
+        })
+
+        const borrarMetodosPago = prisma.metodo_Pago.deleteMany({
+            where: {
+                id_condominio: id
+            }
+        })
+        
+        const borrarCondominio = prisma.condominio.deleteMany({
+            where: {
+                id: id
+            }
+        })
+
+        await prisma.$transaction([
+            borrarPagos, 
+            borrarDeudas,
+            borrarGastos,
+            borrarViviendas,
+            borrarReportes,
+            borrarAnuncios,
+            borrarMetodosPago,
+            borrarCondominio
+        ])
+
+        res.sendStatus(200);
     } catch (error) {
         res.status(500).json({ error: "Error al eliminar el condominio" });
         console.error(error);
