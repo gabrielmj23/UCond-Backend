@@ -15,6 +15,7 @@ import { reportesRouter } from "./routes/reportes";
 import { anunciosRouter } from "./routes/anuncios";
 import { viviendasRouter } from "./routes/viviendas";
 import { pagosRouter } from "./routes/pagos";
+import { notificacionesRouter } from "./routes/notificaciones";
 
 // Inicializar aplicación
 const app = express();
@@ -39,5 +40,6 @@ app.use("/api/reportes", authProtected, reportesRouter);
 app.use("/api/anuncios", authProtected, anunciosRouter);
 app.use("/api/viviendas", authProtected, viviendasRouter);
 app.use("/api/pagos", authProtected, pagosRouter);
+app.use("/api/notificaciones", notificacionesRouter);
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
