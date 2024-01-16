@@ -127,6 +127,23 @@ condominioRouter.post("/:id/viviendas", async (req, res) => {
     }
 });
 
+/**
+ * GET /api/condominios/:id/metodos_pago
+ * Obtener los métodos de pago del condominio
+ */
+condominioRouter.get("/:id/metodos_pago", async (req, res) => {
+    try {
+        const metodos = await prisma.metodo_Pago.findMany({
+            where: { id_condominio: Number(req.params.id) },
+        });
+        res.json({
+            metodos: metodos.map((metodo) => metodo.tipo),
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: err });
+    }
+});
 
 /**
  * POST /api/condominios/:id/metodos_pago
@@ -138,13 +155,20 @@ condominioRouter.post("/:id/metodos_pago", async (req, res) => {
         const idCondominio = Number(req.params.id);
         // Parsear los métodos de pago
         const metodos_pago = metodosPagoSchema.parse(req.body.metodos_pago);
-        // Crear los métodos de pago
-        await prisma.metodo_Pago.createMany({
-            data: metodos_pago.map((tipo) => ({
-                tipo,
-                id_condominio: idCondominio,
-            })),
-        });
+        // Operaciones de la BD
+        await prisma.$transaction([
+            // Borrar los métodos de pago anteriores
+            prisma.metodo_Pago.deleteMany({
+                where: { id_condominio: idCondominio },
+            }),
+            // Crear los métodos de pago
+            prisma.metodo_Pago.createMany({
+                data: metodos_pago.map((tipo) => ({
+                    tipo,
+                    id_condominio: idCondominio,
+                })),
+            }),
+        ]);
         res.sendStatus(200);
     } catch (error) {
         //Error de validacion
@@ -220,66 +244,66 @@ condominioRouter.delete("/:id", async (req, res) => {
             where: {
                 deuda: {
                     gasto: {
-                        id_condominio: id
-                    }
-                }
-            }
-        })
+                        id_condominio: id,
+                    },
+                },
+            },
+        });
 
         const borrarDeudas = prisma.deuda.deleteMany({
             where: {
                 gasto: {
-                    id_condominio: id
-                }
-            }
-        })
+                    id_condominio: id,
+                },
+            },
+        });
 
         const borrarGastos = prisma.gasto.deleteMany({
             where: {
-                id_condominio: id
-            }
-        })
+                id_condominio: id,
+            },
+        });
 
         const borrarViviendas = prisma.vivienda.deleteMany({
             where: {
-                id_condominio: id
-            }
-        })
+                id_condominio: id,
+            },
+        });
 
         const borrarReportes = prisma.reporte.deleteMany({
             where: {
-                id_condominio: id
-            }
-        })
+                id_condominio: id,
+            },
+        });
 
         const borrarAnuncios = prisma.anuncio.deleteMany({
             where: {
-                id_condominio: id
-            }
-        })
+                id_condominio: id,
+            },
+        });
 
         const borrarMetodosPago = prisma.metodo_Pago.deleteMany({
             where: {
-                id_condominio: id
-            }
-        })
-        
+                id_condominio: id,
+            },
+        });
+
         const borrarCondominio = prisma.condominio.deleteMany({
             where: {
-                id: id
-            }
-        })
+                id: id,
+            },
+        });
 
         await prisma.$transaction([
-            borrarPagos, 
+            borrarPagos,
             borrarDeudas,
             borrarGastos,
             borrarViviendas,
             borrarReportes,
             borrarAnuncios,
             borrarMetodosPago,
-            borrarCondominio
-        ])
+            borrarCondominio,
+        ]);
 
         res.sendStatus(200);
     } catch (error) {
@@ -304,21 +328,17 @@ condominioRouter.get("/:id", async (req, res) => {
             },
         });
 
-
         //Verificar que el condominio exista
         if (!condominio) {
             return res.status(404).json({ error: "El condominio no existe" });
         }
 
         res.json(condominio);
-
     } catch (error) {
         res.status(500).json({ error: "Error al obtener el condominio" });
         console.error(error);
     }
 });
-
-
 
 /**
  * GET /api/condominios/:id/inquilinos
@@ -385,7 +405,6 @@ condominioRouter.get("/:id/gastos", async (req, res) => {
                     select: {
                         monto_usuario: true,
                         vivienda: {
-
                             select: {
                                 nombre: true,
                                 cedula_propietario: true,
@@ -396,19 +415,21 @@ condominioRouter.get("/:id/gastos", async (req, res) => {
             },
         });
 
-
         res.json({
-            pagados: gastos.filter((g) => !g.activo).map((gasto) => ({
-                ...gasto,
-                deudas: gasto.deudas.map((deuda) => ({
-                    monto_usuario: deuda.monto_usuario,
-                    nombre_vivienda: deuda.vivienda.nombre,
-                    cedula_usuario: deuda.vivienda.cedula_propietario,
+            pagados: gastos
+                .filter((g) => !g.activo)
+                .map((gasto) => ({
+                    ...gasto,
+                    deudas: gasto.deudas.map((deuda) => ({
+                        monto_usuario: deuda.monto_usuario,
+                        nombre_vivienda: deuda.vivienda.nombre,
+                        cedula_usuario: deuda.vivienda.cedula_propietario,
+                    })),
                 })),
-            })),
 
             por_pagar: gastos
-                .filter((g) => g.activo).map((gasto) => ({
+                .filter((g) => g.activo)
+                .map((gasto) => ({
                     ...gasto,
                     deudas: gasto.deudas.map((deuda) => ({
                         monto_usuario: deuda.monto_usuario,
@@ -461,7 +482,6 @@ condominioRouter.get("/:id/pagos", async (req, res) => {
                 },
             },
         });
-
 
         res.json({
             confirmados: pagos.filter((p) => p.confirmado),
