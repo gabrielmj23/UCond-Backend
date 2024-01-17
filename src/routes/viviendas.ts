@@ -140,7 +140,7 @@ viviendasRouter.post("/:id/pagos", async (req, res) => {
         }
 
         // Crear pago
-        await prisma.pago.create({
+        const pagoCreado = await prisma.pago.create({
             data: {
                 id_deuda: pago.id_deuda,
                 monto_pagado: pago.monto_pagado,
@@ -150,7 +150,7 @@ viviendasRouter.post("/:id/pagos", async (req, res) => {
             },
         });
 
-        res.sendStatus(200);
+        res.json({ idPago: pagoCreado.id });
     } catch (error) {
         console.error(error);
         res.json({ error });
