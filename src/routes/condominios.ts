@@ -498,6 +498,69 @@ condominioRouter.get("/:id/pagos", async (req, res) => {
 });
 
 /**
+ * GET /api/condominios/:id/resumen-financiero
+ * Devuelve el resumen financiero del condominio (Deuda pendiente, saldo confirmado y saldo por confirmar)
+ */
+condominioRouter.get("/:id/resumen-financiero", async (req, res) => {
+    try {
+        // Obtener deudas y pagos siempre que estén activos
+        const deudas = await prisma.deuda.findMany({
+            where: {
+                gasto: {
+                    id_condominio: Number(req.params.id),
+                    OR: [
+                        { activo: true },
+                        {
+                            fecha_creado: {
+                                gte: new Date(
+                                    `${new Date().getMonth() + 1}/01/01`,
+                                ),
+                            },
+                        },
+                    ],
+                },
+            },
+            select: {
+                activa: true,
+                monto_usuario: true,
+                pagos: {
+                    select: {
+                        confirmado: true,
+                        monto_pagado: true,
+                    },
+                },
+            },
+        });
+        // Saldo por confirmar
+        const saldoPorConfirmar = deudas
+            .flatMap((deuda) => deuda.pagos.filter((pago) => !pago.confirmado))
+            .reduce((acc, pago) => acc + pago.monto_pagado, 0);
+        // Saldo confirmado
+        const saldoConfirmado = deudas
+            .flatMap((deuda) => deuda.pagos.filter((pago) => pago.confirmado))
+            .reduce((acc, pago) => acc + pago.monto_pagado, 0);
+        // Deuda pendiente
+        const deudasActivas = deudas.filter((deuda) => deuda.activa);
+        const deudaPendiente =
+            deudasActivas.reduce((acc, deuda) => acc + deuda.monto_usuario, 0) -
+            deudasActivas
+                .flatMap((deuda) =>
+                    deuda.pagos.filter((pago) => pago.confirmado),
+                )
+                .reduce((acc, pago) => acc + pago.monto_pagado, 0);
+        // Responder
+        res.json({
+            saldoConfirmado,
+            saldoPorConfirmar,
+            deudaPendiente,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error });
+    }
+});
+
+/**
  * GET /api/condominio/:id/reportes?activo=<activo>
  * Busca los reportes asociados a un condominio por id
  */
