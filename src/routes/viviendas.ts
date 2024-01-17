@@ -153,7 +153,7 @@ viviendasRouter.post("/:id/pagos", async (req, res) => {
         res.json({ idPago: pagoCreado.id });
     } catch (error) {
         console.error(error);
-        res.json({ error });
+        res.status(500).json({ error });
     }
 });
 
