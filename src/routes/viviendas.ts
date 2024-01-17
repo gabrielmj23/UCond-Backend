@@ -109,6 +109,37 @@ viviendasRouter.get("/:id/pagos", async (req, res) => {
 });
 
 /**
+ * GET /api/viviendas/:id/resumen-financiero
+ * Obtiene el resumen financiero de la vivienda (monto por pagar)
+ */
+viviendasRouter.get("/:id/resumen-financiero", async (req, res) => {
+    try {
+        // Obtener deudas activas con sus pagos
+        const deudas = await prisma.deuda.findMany({
+            where: { id_vivienda: Number(req.params.id), activa: true },
+            select: {
+                monto_usuario: true,
+                pagos: {
+                    select: {
+                        monto_pagado: true,
+                    },
+                },
+            },
+        });
+        // Devolver cálculo
+        const montoPorPagar =
+            deudas.reduce((acc, deuda) => acc + deuda.monto_usuario, 0) -
+            deudas
+                .flatMap((deuda) => deuda.pagos)
+                .reduce((acc, pago) => acc + pago.monto_pagado, 0);
+        res.json({ montoPorPagar });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error });
+    }
+});
+
+/**
  * POST /api/viviendas/:id/pagos
  * Realiza un pago a una vivienda (cuando el usuario no está registrado)
  */
