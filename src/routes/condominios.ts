@@ -403,6 +403,7 @@ condominioRouter.get("/:id/gastos", async (req, res) => {
             include: {
                 deudas: {
                     select: {
+                        id: true,
                         monto_usuario: true,
                         vivienda: {
                             select: {
@@ -421,6 +422,7 @@ condominioRouter.get("/:id/gastos", async (req, res) => {
                 .map((gasto) => ({
                     ...gasto,
                     deudas: gasto.deudas.map((deuda) => ({
+                        id: deuda.id,
                         monto_usuario: deuda.monto_usuario,
                         nombre_vivienda: deuda.vivienda.nombre,
                         cedula_usuario: deuda.vivienda.cedula_propietario,
@@ -432,6 +434,7 @@ condominioRouter.get("/:id/gastos", async (req, res) => {
                 .map((gasto) => ({
                     ...gasto,
                     deudas: gasto.deudas.map((deuda) => ({
+                        id: deuda.id,
                         monto_usuario: deuda.monto_usuario,
                         nombre_vivienda: deuda.vivienda.nombre,
                         cedula_usuario: deuda.vivienda.cedula_propietario,
