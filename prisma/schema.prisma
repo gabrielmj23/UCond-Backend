@@ -117,7 +117,7 @@ model Pago {
   notas           String?
   nro_referencia  String?
   confirmado      Boolean  @default(false)
-  url_comprobante String
+  url_comprobante String?
 }
 
 model Reporte {

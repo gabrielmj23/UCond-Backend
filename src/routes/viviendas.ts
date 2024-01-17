@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { Router } from "express";
 import { z } from "zod";
+import { pagoSchema } from "../schemas/pago";
 
 export const viviendasRouter = Router();
 const prisma = new PrismaClient();
@@ -104,6 +105,55 @@ viviendasRouter.get("/:id/pagos", async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ error });
+    }
+});
+
+/**
+ * POST /api/viviendas/:id/pagos
+ * Realiza un pago a una vivienda (cuando el usuario no está registrado)
+ */
+viviendasRouter.post("/:id/pagos", async (req, res) => {
+    try {
+        //Parsear pago
+        const pago = pagoSchema.parse({
+            ...req.body,
+        });
+
+        //Verificar que la vivienda existe
+        const vivienda = await prisma.vivienda.findUnique({
+            where: { id: pago.id_vivienda },
+        });
+        if (!vivienda) {
+            return res.status(400).json({ error: "La vivienda no existe" });
+        }
+
+        // Obtener informacion de deuda
+        const deuda = await prisma.deuda.findUnique({
+            where: { id: pago.id_deuda },
+            include: { pagos: true },
+        });
+        if (!deuda) {
+            return res.status(404).json({ error: "Deuda no encontrada" });
+        }
+        if (!deuda.activa) {
+            return res.status(400).json({ error: "La deuda no está activa" });
+        }
+
+        // Crear pago
+        await prisma.pago.create({
+            data: {
+                id_deuda: pago.id_deuda,
+                monto_pagado: pago.monto_pagado,
+                metodo_pago: pago.metodo_pago,
+                notas: pago.notas,
+                nro_referencia: pago.nro_referencia,
+            },
+        });
+
+        res.sendStatus(200);
+    } catch (error) {
+        console.error(error);
+        res.json({ error });
     }
 });
 

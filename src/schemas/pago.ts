@@ -18,7 +18,7 @@ export const pagoSchema = z.object({
         .trim()
         .min(1, "El metodo de pago no puede estar vacio")
         .max(255),
-    url_comprobante: z.string().trim().max(255),
+    url_comprobante: z.string().trim().max(255).optional(),
     notas: z.string().trim().max(255).optional(),
     nro_referencia: z.string().trim().max(255).optional(),
 });
